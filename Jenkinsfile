@@ -11,47 +11,43 @@ pipeline {
     }
 
     stages {
-            stage("Infra"){
-                steps{
+        stage("Infra") {
+            steps {
                 echo "Creating Key Pair for ${APP_NAME} App"
                 sh "aws ec2 create-key-pair --region ${AWS_REGION} --key-name ${ANS_KEYPAIR} --query KeyMaterial --output text > ${ANS_KEYPAIR}"
                 sh "chmod 400 ${ANS_KEYPAIR}"
-                }
-                steps{
-                    echo 'Creating Infrastructure for the App on AWS Cloud'
-                    sh "terraform init"
-                    sh "terraform apply -auto-approve"
-                }
-                steps{
-                    echo 'Creating ECR Repo for App'
-                    sh """
-                    aws ecr describe-repositories --region ${AWS_REGION} --repository-name ${APP_REPO_NAME} || \
-                    aws ecr create-repository \
-                    --repository-name ${APP_REPO_NAME} \
-                    --image-scanning-configuration scanOnPush=false \
-                    --image-tag-mutability MUTABLE \
-                    --region ${AWS_REGION}
-                    """
-                }
 
+                echo 'Creating Infrastructure for the App on AWS Cloud'
+                sh "terraform init"
+                sh "terraform apply -auto-approve"
 
+                echo 'Creating ECR Repo for App'
+                sh """
+                aws ecr describe-repositories --region ${AWS_REGION} --repository-name ${APP_REPO_NAME} || \
+                aws ecr create-repository \
+                --repository-name ${APP_REPO_NAME} \
+                --image-scanning-configuration scanOnPush=false \
+                --image-tag-mutability MUTABLE \
+                --region ${AWS_REGION}
+                """
             }
-            stage("CI"){
+        }
+
+        stage("CI") {
             steps {
                 echo 'Building App Image'
                 sh 'pwd'
                 sh 'ls -l'
                 sh 'docker build --force-rm -t "$ECR_REGISTRY/$APP_REPO_NAME:latest" -f ./App/Dockerfile ./App'
                 sh 'docker image ls'
-            }
-            steps {
+
                 echo 'Pushing App Image to ECR Repo'
                 sh 'aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin "$ECR_REGISTRY"'
                 sh 'docker push "$ECR_REGISTRY/$APP_REPO_NAME:latest"'
             }
-            }
+        }
 
-        stage("Wait"){
+        stage("Wait") {
             steps {
                 script {
                     echo 'Waiting for the instance'
@@ -59,17 +55,15 @@ pipeline {
                     sh 'aws ec2 wait instance-status-ok --instance-ids $id'
                 }
             }
+        }
 
-            }
-            stage("Config and Deploy"){
-                steps {
+        stage("Config and Deploy") {
+            steps {
                 echo 'env update'
                 sh """
                 envsubst < docker-compose-template.yaml > docker-compose.yml
                 """
-            }
 
-                steps {
                 echo 'Deploy the App'
                 sh 'ls -l'
                 sh 'ansible --version'
@@ -80,12 +74,11 @@ pipeline {
                     ansible-playbook -i ./inventory_aws_ec2.yml -e "compose_dir=${env.WORKSPACE}" ./playbook.yml
                 """
             }
+        }
 
-
-            }
-            stage("Destroy Infra"){
-            steps{
-                timeout(time:5, unit:'DAYS'){
+        stage("Destroy Infra") {
+            steps {
+                timeout(time:5, unit:'DAYS') {
                     input message:'Approve terminate'
                 }
                 sh """
@@ -99,9 +92,7 @@ pipeline {
                 rm -rf ${ANS_KEYPAIR}
                 """
             }
-
-            }    
-            
+        }    
     }
 
     post {
@@ -127,16 +118,6 @@ pipeline {
                 """
             echo 'Deleting Terraform Stack due to the Failure'
                 sh 'terraform destroy --auto-approve'
-
         }
-
-
-
-
-
     }
-
-
-
-
 }
