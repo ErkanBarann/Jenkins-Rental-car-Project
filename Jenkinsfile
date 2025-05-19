@@ -71,7 +71,7 @@ pipeline {
                 sh """
                     export ANSIBLE_PRIVATE_KEY_FILE="${WORKSPACE}/${ANS_KEYPAIR}"
                     export ANSIBLE_HOST_KEY_CHECKING=False
-                    ansible-playbook -i ./inventory_aws_ec2.yml -e "compose_dir=${env.WORKSPACE}" ./playbook.yml
+                    ansible-playbook -i ./inventory_aws_ec2.yml -e "compose_dir=${env.WORKSPACE}" ./playbook.yaml
                 """
             }
         }
