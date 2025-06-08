@@ -1,92 +1,68 @@
-![resim](jenkinsproject.png)
+## 📸 Architecture Diagram
 
-# MAİN.TF
+![Pipeline Diagram](jenkinsproject.png)
 
-## Provider Settings
+# Jenkins-Based CI/CD Project: Docker Compose Deployment on AWS
 
-- **AWS Provider:** Utilizes the Hashicorp AWS module with last version.
-- **Region Configuration:** Configured to deploy resources in the AWS `us-east-1` region.
+This project demonstrates a complete CI/CD pipeline that automates the provisioning, configuration, containerization, and deployment of a Docker-based application on AWS EC2 using **Terraform**, **Ansible**, **Docker Compose**, and **Jenkins**.
 
-## Variables
+---
 
-- **Key Variable:** The `key` variable is set to `"jenkins-project"` and is used as the name for the SSH key pair for the EC2 instance.
-- **User Variable:** The `user` variable is set to `"techpro"` which is used to determine user-specific configurations or contexts.
+## 📌 Project Structure
 
-## EC2 Instance
+```text
+Jenkins-Project/
+├── app/                        # Application source code (frontend/backend)
+├── ansible.cfg                 # Ansible configuration file
+├── inventory-aws-ec2.yaml      # Ansible inventory for the AWS EC2 instance
+├── Dockerfile                  # Dockerfile for building application image
+├── docker-compose.yaml         # Docker Compose file for multi-service app
+├── main.tf                     # Terraform file to provision EC2 instance
+├── playbook.yaml               # Ansible playbook to install Docker, Compose, etc.
+└── Jenkinsfile                 # Jenkins pipeline definition
+```
 
-- **Resource Type:** `aws_instance`
-- **Instance Type:** `t3a.medium`
-- **AMI:** The AMI used is `"ami-0f88e80871fd81e91"`.
-- **IAM Role:** Associated with a specific IAM role named `jenkins-project-profile-techpro`.
-- **Tags:** The instance is tagged with a `Name` of `"jenkins_project"`.
+---
 
-## Security Group
+## ⚙️ Tools Used
 
-- **Resource Name:** `aws_security_group` with the name `"project-jenkins-sec-gr"`.
-- **Ingress Rules:**
-  - Allows incoming connections on port 22 (SSH).
-  - Allows incoming connections on port 8000 for web applications.
-  - Allows incoming connections on port 80 for nginx.
-  - Allows incoming connections on port 3306 for MYSQL database access.
-- **Egress Rules:**
-  - Allows all outgoing traffic from any port to any destination (`0.0.0.0/0`).
+- **Terraform**: Provisions AWS EC2 infrastructure.
+- **Ansible**: Configures EC2 instance with Docker, Docker Compose, etc.
+- **Docker & Docker Compose**: Containerize and run multi-service app.
+- **Jenkins**: Orchestrates the CI/CD pipeline.
+- **AWS EC2 & ECR**: Hosts and stores Docker images.
 
-## Outputs
+---
 
-- **Public IP:** The script outputs the public IP address of the created EC2 instance as `node_public_ip`.
+## 🚀 CI/CD Pipeline Overview
 
+The pipeline is triggered automatically via a **GitHub webhook** when changes are pushed to the repository.
 
+```text
+1. Create Infra        → Using Terraform (main.tf)
+2. Create ECR Repo     → To store Docker image
+3. Build Image         → From Dockerfile
+4. Push Image          → To AWS ECR
+5. Wait                → For EC2 readiness
+6. Deploy App          → Via Ansible (playbook.yaml) + Docker Compose
+7. Destroy Infra       → Tear down EC2 after deployment
+8. Post                → Final steps (e.g., notification/logging)
+```
 
+---
 
-# Playbook.yaml
+## 📦 Application
 
+- The application source code is placed under the `app/` folder.
+- Dockerfile and docker-compose.yaml are used to containerize and run the app.
+- The app is deployed to the EC2 instance via Ansible and Docker Compose.
 
-## Update System Packages
-- **Description:** Updates all packages on the system to their latest versions.
-- **Command:** `sudo yum update -y`
+---
 
-## Remove Old Docker Versions
-- **Description:** Removes old Docker packages installed from the CentOS repository.
-- **Packages Removed:**
-  - docker
-  - docker-client
-  - docker-client-latest
-  - docker-common
-  - docker-latest
-  - docker-latest-logrotate
-  - docker-logrotate
-  - docker-engine
+## ✅ Output
 
-## Install Yum Utilities
-- **Description:** Installs necessary utilities for managing packages.
-- **Utilities Installed:**
-  - yum-utils
-  - device-mapper-persistent-data
-  - lvm2
-  - unzip
+- A fully automated pipeline that handles provisioning, Docker image creation, ECR push, deployment, and teardown.
+- Demonstrates end-to-end CI/CD using Jenkins for real-world Dockerized application delivery on AWS.
 
-## Install Docker
-- **Description:** Installs the latest version of Docker using yum.
+---
 
-## Add User to Docker Group
-- **Description:** Adds the `ec2-user` to the Docker group to allow running Docker without 
-
-## Start Docker Service
-- **Description:** Starts and enables the Docker service to run on boot.
-
-## Install Docker Compose
-- **Description:** Downloads and installs Docker Compose.
-
-## Log in to AWS ECR
-- **Description:** Logs into AWS Elastic Container Registry using Docker.
-
-
-## Copy docker-compose.yml to Server
-- **Description:** Copies the local `docker-compose.yml` file to the server's `/home/ec2-user/` directory.
-
-## Start Application with Docker Compose
-- **Description:** Starts the application using Docker Compose in detached mode.
-
-# docker-compose.yaml
-
-# Jenkinsfile
