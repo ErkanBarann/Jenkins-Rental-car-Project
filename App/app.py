@@ -814,7 +814,7 @@ def seed_database():
         raise e
 
 def init_database():
-    """Veritabanını başlat ve gerekli kontrolleri yap"""
+    """Veritabanını başlat ve gerekli kontrolleri yapp"""
     try:
         with app.app_context():  # Burada app context'i açıyoruz
             db.create_all()  # Tabloları oluşturmak için db.create_all()'i çalıştırıyoruz
@@ -834,7 +834,7 @@ def init_database():
                 admin.set_password('admin123')
                 db.session.add(admin)
                 db.session.commit()
-                logging.info("Admin kullanıcısı oluşturuldu.")
+                logging.info("Admin kullanıcısı oluşturuldu..")
             
             # Örnek araçları kontrol et ve yoksa ekle
             if not Araba.query.first():
