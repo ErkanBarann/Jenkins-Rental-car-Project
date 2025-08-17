@@ -814,11 +814,11 @@ def seed_database():
         raise e
 
 def init_database():
-    """Veritabanını başlat ve gerekli kontrolleri yapp"""
+    """Veritabanını başlat ve gerekli kontrolleri yappp"""
     try:
         with app.app_context():  # Burada app context'i açıyoruz
             db.create_all()  # Tabloları oluşturmak için db.create_all()'i çalıştırıyoruz
-            logging.info("Veritabanı tabloları kontrol edildi/oluşturuldu.")
+            logging.info("Veritabanı tabloları kontrol edildi/oluşturuldu..")
             
             # Veritabanı güncellemelerini yap
             update_database()
