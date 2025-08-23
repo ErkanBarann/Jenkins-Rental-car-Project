@@ -6,7 +6,7 @@ pipeline {
         ANS_KEYPAIR="jenkins-project"
         AWS_ACCOUNT_ID=sh(script:'export PATH="$PATH:/usr/local/bin" && aws sts get-caller-identity --query Account --output text', returnStdout:true).trim()
         ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-        APP_REPO_NAME = "techpro-rental-car"
+        APP_REPO_NAME = "project-rental-car"
         APP_NAME = "rental"
     }
 

@@ -1,6 +1,6 @@
 services:
   app:
-    image:  "${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/techpro-rental-car:latest"
+    image:  "${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/project-rental-car:latest"
     container_name: flask-app
     restart: always
     environment:
@@ -38,7 +38,7 @@ services:
     image: nginx
     container_name: nginx-container
     environment:
-      - DOMAIN_NAME=erkanbaran.me
+      - DOMAIN_NAME=car.erkanbaran.me
     depends_on:
       - app
     volumes:
